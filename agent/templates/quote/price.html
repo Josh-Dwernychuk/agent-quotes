@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block notifications %}
+<div>
+    <i class="fa fa-comment fa-fw"></i> You have {{new_quotes.count}} New Quote(s)
+</div>
+{% endblock notifications %}
+
+{% block content %}
+<div id="page-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Quote Information</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                Full Name
+                            </div>
+                            <div class="panel-body">
+                                <p>{{quote.customer.name}}</p>
+                            </div>
+                            <div class="panel-footer">
+                                Customer Full Name
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                Address
+                            </div>
+                            <div class="panel-body">
+                                <p>{{quote.address}}</p>
+                            </div>
+                            <div class="panel-footer">
+                                Customer Address
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                Type
+                            </div>
+                            <div class="panel-body">
+                                <p>{{quote.customer.customer_type}}</p>
+                            </div>
+                            <div class="panel-footer">
+                                Customer Type
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form action="{% url 'quote:price' pk=quote.id %}" method="post">
+                  {{ price_form }}
+                  {% csrf_token %}
+                  <input type="submit" value="Submit" name="submit" class="btn btn-primary">
+                </form>
+{% endblock %}
