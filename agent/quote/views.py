@@ -1,17 +1,13 @@
-import datetime
-from dateutil.relativedelta import relativedelta
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 
-from django.db.models import Avg, Max, Min
 from django.shortcuts import render
-from django.utils import timezone
 from django.views import View
 
 from .forms import PriceForm
 from .models import Quote
+from .utils import create_non_naive_date_time, create_date_list, build_api_result
 
 
 def dashboard(request):
@@ -68,14 +64,13 @@ class Price(View):
                 Quote detail template with price_form, quote, and new_quote template variables
         """
         new_quotes = Quote.objects.filter(new_quote=True)
+
         quote = Quote.objects.get(id=pk)
+        quote.start_time = create_non_naive_date_time()
+        quote.save()
+
         price_form = PriceForm()
 
-        current_datetime = datetime.datetime.now()
-        current_timezone = timezone.get_current_timezone()
-        non_naive_start_time = current_timezone.localize(current_datetime, is_dst=None)
-        quote.start_time = non_naive_start_time
-        quote.save()
         return render(
             request,
             'quote/price.html',
@@ -91,18 +86,17 @@ class Price(View):
                 New quotes template with new_quote template variable
         """
         new_quotes = Quote.objects.filter(new_quote=True)
+
         price_form = PriceForm(request.POST)
         if price_form.is_valid():
             price = price_form.cleaned_data['price_form']
+
         quote = Quote.objects.get(id=pk)
         quote.new_quote = False
         quote.price = price
-
-        current_datetime = datetime.datetime.now()
-        current_timezone = timezone.get_current_timezone()
-        non_naive_end_time = current_timezone.localize(current_datetime, is_dst=None)
-        quote.end_time = non_naive_end_time
+        quote.end_time = create_non_naive_date_time()
         quote.save()
+
         return render(request, 'quote/new.html', {'new_quotes': new_quotes})
 
 
@@ -121,52 +115,6 @@ class AgentPerformance(APIView):
                 JSON response of agent performance data
         """
         agent_quotes = Quote.objects.filter(new_quote=False).filter(customer__agent=pk)
-        first_month = agent_quotes.earliest('end_time').end_time
-        last_month = agent_quotes.latest('end_time').end_time
-
-        date_list = []
-        while first_month <= last_month:
-            date_list.append(first_month)
-            first_month += relativedelta(months=1)
-
-        api_result = {}
-        for date in date_list:
-            agent_quotes = Quote.objects.filter(
-                new_quote=False
-                ).filter(
-                customer__agent=pk
-                ).filter(
-                end_time__month=date.month
-                ).filter(
-                end_time__year=date.year
-            )
-
-            quotes_finished = agent_quotes.count()
-            if quotes_finished:
-                price_average = agent_quotes.aggregate(Avg('price'))['price__avg']
-                price_max = agent_quotes.aggregate(Max('price'))['price__max']
-                price_min = agent_quotes.aggregate(Min('price'))['price__min']
-
-                quote_completion_total = 0
-                for agent_quote in agent_quotes:
-                    quote_completion_total += \
-                        (agent_quote.end_time - agent_quote.start_time).total_seconds()
-                quote_completion_average = quote_completion_total/float(quotes_finished)
-            else:
-                price_average = 0
-                price_max = 0
-                price_min = 0
-                quote_completion_average = 0
-
-            api_result[str(date.month) + '/' + str(date.year)] = {
-                'quotes_finished': quotes_finished,
-                'price': {
-                    'average': price_average,
-                    'max': price_max,
-                    'min': price_min,
-                },
-                'quote_time': {
-                    'average': quote_completion_average,
-                },
-            }
+        date_list = create_date_list(agent_quotes)
+        api_result = build_api_result(date_list, pk)
         return Response(api_result)

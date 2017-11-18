@@ -92,6 +92,13 @@ The page should now be visible at:
 
 It is assumed that this feature would not live at the root URL and so it has all been arranged so that the root URL is vacant and all application features live at quote/.
 
+## API
+The API endpoint for agent-specific performance metrics is:
+```
+localhost:8000/quote/performance/pk/
+```
+where pk is the primary key of the agent to be assessed.
+No authentication is required at this time for read operations but could be added if desired.
 
 ## Running Tests
 pytest is in use for testing. We can run tests by running:
