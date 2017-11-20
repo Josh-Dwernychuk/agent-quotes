@@ -8,7 +8,7 @@ SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env.bool('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.herouapp.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -102,3 +102,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissions',
     )
 }
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

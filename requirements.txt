@@ -1,0 +1,2 @@
+# this is required for heroku to detect this as a python application
+-r requirements/production.txt

@@ -1,7 +1,7 @@
 # agent-quotes
 Web service to allow agents to efficiently perform customer quotes
 
-## Challenge Preface
+## Preface
 The product has been designed following the django-cookiecutter layout recommended by Daniel Roy Greenfield, author of Two Scoops of Django for Django best practices.
 
 The directory structure is as follows:
@@ -37,9 +37,9 @@ pip install -r requirements/local.txt
 1. Install Postgres [On a Mac: https://postgresapp.com/] - make sure to install the CLI tools as well.
 2. Create a database with the dev credentials
 ```
-# create user safebutleruser with password 'safebutlerpass';
-# create database safebutler;
-# grant all privileges on database safebutler to safebutleruser;
+# create user databaseuser with password 'databasepass';
+# create database databasename;
+# grant all privileges on database databasename to databaseuser;
 ```
 
 3. Set up .env file in your local repository
@@ -56,7 +56,7 @@ In our example case, it will look like so:
 ```
 DEBUG=on
 SECRET_KEY=SECRET_KEY
-DATABASE_URL=psql://safebutleruser:safebutlerpass@127.0.0.1:5432/safebutler
+DATABASE_URL=psql://databaseuser:databasepass@127.0.0.1:5432/databasename
 ```
 
 ## Set up environment variables for VirtualEnv (with virtualenvwrapper)
